@@ -6,6 +6,8 @@
 
 static const int32_t SCALE_FACTOR = 5;
 
+const BRS_Point3D WORLD_ORIGIN = {.x = 0, .y=0, .z=0};
+
 BRS_Vertex *BRS_Render3D_createVertex(int32_t x, int32_t y, int32_t z) {
     BRS_Vertex *vertex = malloc(sizeof(BRS_Vertex));
     BRS_Point3D *position = malloc(sizeof(BRS_Point3D));
@@ -23,6 +25,16 @@ void BRS_Render3D_destroyVertex(BRS_Vertex *vertex) {
     free(vertex);
 }
 
+BRS_Transformation3D *BRS_Render3D_createTransformation() {
+    BRS_Transformation3D *transformation3D = malloc(sizeof(BRS_Transformation3D));
+    transformation3D->rotateDegrees = 0;
+    return transformation3D;
+}
+
+void BRS_Render3D_destroyTransformation(BRS_Transformation3D *transformation3D) {
+    free(transformation3D);
+}
+
 static void BRS_drawPoint3D(const BRS_VideoContext *context, const BRS_Point3D *point3D) {
     int32_t z = (point3D->z == 0 ? 1 : point3D->z);
     int32_t viewX = point3D->x / z;
@@ -30,21 +42,49 @@ static void BRS_drawPoint3D(const BRS_VideoContext *context, const BRS_Point3D *
     SDL_RenderDrawPoint(context->renderer, viewX, viewY);
 }
 
-static BRS_Point *calcScreenPoint(const BRS_Point3D *point3D, BRS_Point *screenPoint) {
-    int32_t z = point3D->z == 0 ? 1 : point3D->z;
-    int32_t viewingDistance = 5;
-    int32_t offsetX = 400;
-    int32_t offsetY = 300;
-    screenPoint->x = offsetX + viewingDistance * point3D->x / z;
-    screenPoint->y = offsetY + viewingDistance * point3D->y / z;
+static void transformPoint3D(BRS_Point3D *point3D, BRS_Transformation3D *transformation3D) {
+    double rad = DEG_TO_RAD(transformation3D->rotateDegrees);
+
+    // rotate around z-axis
+    point3D->x = point3D->x * cos(rad) - point3D->y * sin(rad);
+    point3D->y = point3D->x * sin(rad) + point3D->y * cos(rad);
+
+//    // rotate around y-axis
+//    point3D->x = point3D->x * cos(rad) + point3D->z * sin(rad);
+//    point3D->z = - point3D->x * sin(rad) + point3D->z * cos(rad);
+
+    // rotate around x-axis
+//    point3D->y = point3D->y * cos(rad) - point3D->z * sin(rad);
+//    point3D->z = - point3D->y * sin(rad) + point3D->z * cos(rad);
 }
 
-static void BRS_drawLine3D(const BRS_VideoContext *context, const BRS_Line3D *line3D) {
+static BRS_Point *
+calcScreenPoint(const BRS_Point3D *point3Din, BRS_Point *screenPoint, BRS_Transformation3D *transformation3D) {
+    BRS_Point3D point3D;
+    point3D.x = point3Din->x;
+    point3D.y = point3Din->y;
+    point3D.z = point3Din->z;
+
+    transformPoint3D(&point3D, transformation3D);
+
+    int32_t z = point3D.z == 0 ? 1 : point3D.z;
+    int32_t viewingDistance = 10;
+    int32_t offsetX = 400;
+    int32_t offsetY = 300;
+    screenPoint->x = offsetX + viewingDistance * point3D.x / z;
+    screenPoint->y = offsetY + viewingDistance * point3D.y / z;
+
+//    screenPoint->x = offsetX + viewingDistance * point3D.x;
+//    screenPoint->y = offsetY + viewingDistance * point3D.y;
+}
+
+static void
+BRS_drawLine3D(const BRS_VideoContext *context, const BRS_Line3D *line3D, BRS_Transformation3D *transformation3D) {
     BRS_Point point2d_1;
-    calcScreenPoint(line3D->p1, &point2d_1);
+    calcScreenPoint(line3D->p1, &point2d_1, transformation3D);
 
     BRS_Point point2d_2;
-    calcScreenPoint(line3D->p2, &point2d_2);
+    calcScreenPoint(line3D->p2, &point2d_2, transformation3D);
 
     SDL_RenderDrawLine(context->renderer, point2d_1.x, point2d_1.y, point2d_2.x, point2d_2.y);
 }
@@ -54,7 +94,7 @@ static void BRS_drawVertex(BRS_VideoContext *context, BRS_Vertex *vertex) {
     BRS_drawPoint3D(context, vertex->position);
 }
 
-static void BRS_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon) {
+static void BRS_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon, BRS_Transformation3D *transformation3D) {
     const BRS_Color *color = &COLOR_YELLOW;
     BRS_setColor(context, color);
     BRS_Vertex *lastVertex = NULL;
@@ -68,21 +108,18 @@ static void BRS_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon) {
         if (lastVertex != NULL) {
             line3D.p1 = lastVertex->position;
             line3D.p2 = polygon->vertices[verticesIndex]->position;
-            BRS_drawLine3D(context, &line3D);
+            BRS_drawLine3D(context, &line3D, transformation3D);
         }
         lastVertex = polygon->vertices[verticesIndex];
     }
     line3D.p1 = lastVertex->position;
     line3D.p2 = firstVertex->position;
-    BRS_drawLine3D(context, &line3D);
+    BRS_drawLine3D(context, &line3D, transformation3D);
 }
 
-void BRS_Render3D_drawObject(BRS_VideoContext *context, BRS_Object3D *object3d) {
+void
+BRS_Render3D_drawObject(BRS_VideoContext *context, BRS_Object3D *object3d, BRS_Transformation3D *transformation3D) {
     for (uint8_t polygonIndex = 0; polygonIndex < object3d->numPolygons; polygonIndex++) {
-        BRS_drawPolygon(context, object3d->polygons[polygonIndex]);
+        BRS_drawPolygon(context, object3d->polygons[polygonIndex], transformation3D);
     }
-}
-
-void BRS_Render3D_rotateObject(BRS_Object3D *object3d) {
-
 }

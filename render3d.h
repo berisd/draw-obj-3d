@@ -7,9 +7,13 @@
 
 #include <stdint.h>
 #include "color.h"
+#include <math.h>
 
 #define MAX_POLYGONS 16
 #define MAX_VERTICES 16
+
+#define DEG_TO_RAD(deg) (M_PI*deg/180)
+#define RAD_TO_DEG(rad) (180*rad/M_PI)
 
 typedef struct _BRS_Point3D {
     int32_t x;
@@ -38,10 +42,18 @@ typedef struct _BRS_Object3D {
     BRS_Polygon *polygons[MAX_POLYGONS];
 } BRS_Object3D;
 
-void BRS_Render3D_drawObject(BRS_VideoContext *context, BRS_Object3D *object3d);
-void BRS_Render3D_rotateObject(BRS_Object3D *object3d);
+typedef struct _BRS_Transformation3D {
+    uint16_t rotateDegrees;
+} BRS_Transformation3D;
+
+void BRS_Render3D_drawObject(BRS_VideoContext *context, BRS_Object3D *object3d, BRS_Transformation3D *transformation3D);
 
 BRS_Vertex *BRS_Render3D_createVertex(int32_t x, int32_t y, int32_t z);
+
 void BRS_Render3D_destroyVertex(BRS_Vertex *vertex);
+
+BRS_Transformation3D *BRS_Render3D_createTransformation();
+
+void BRS_Render3D_destroyTransformation(BRS_Transformation3D *transformation3D);
 
 #endif //DRAW_OBJ_3D_RENDER3D_H

@@ -14,6 +14,7 @@ typedef struct ApplicationConfig {
 typedef struct _ApplicationState {
     BRS_VideoContext *videoContext;
     BRS_Object3D *object3D;
+    BRS_Transformation3D *transformation3D;
     bool quit;
 } ApplicationState;
 
@@ -92,9 +93,9 @@ static BRS_Object3D *createCube3D() {
     obj3d->polygons[4] = leftFace;
     obj3d->polygons[5] = rightFace;
 
-//    obj3d->numPolygons = 1;
-//    obj3d->polygons[0] = bottomFace;
-//    obj3d->polygons[1] = topFace;
+//    obj3d->numPolygons = 2;
+//    obj3d->polygons[0] = frontFace;
+//    obj3d->polygons[1] = backFace;
 //    obj3d->polygons[2] = topFace;
 //    obj3d->polygons[3] = bottomFace;
 //    obj3d->polygons[4] = leftFace;
@@ -112,6 +113,7 @@ static ApplicationState *initApplication(const ApplicationConfig *config) {
     }
     applicationState->videoContext = videoContext;
     applicationState->object3D = createCube3D();
+    applicationState->transformation3D = BRS_Render3D_createTransformation();
     atexit(SDL_Quit);
     return applicationState;
 }
@@ -132,7 +134,8 @@ static bool checkQuitApplication(SDL_Event *event) {
 static void handleVideo(ApplicationState *applicationState) {
     BRS_setColor(applicationState->videoContext, &COLOR_BLACK);
     BRS_clearVideo(applicationState->videoContext);
-    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D);
+    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D,
+                            applicationState->transformation3D);
     BRS_updateVideo(applicationState->videoContext);
 }
 
@@ -140,14 +143,24 @@ static void processEvent(SDL_Event *event, ApplicationState *applicationState) {
 
 }
 
+static void rotateObject(ApplicationState *applicationState) {
+    applicationState->transformation3D->rotateDegrees++;
+    if (applicationState->transformation3D->rotateDegrees >= 360) {
+        applicationState->transformation3D->rotateDegrees = 1;
+    }
+}
+
 static void runApplication(ApplicationState *applicationState) {
     SDL_Event event;
+
     while (!applicationState->quit) {
         if (SDL_PollEvent(&event) != 0) {
             applicationState->quit = checkQuitApplication(&event);
             processEvent(&event, applicationState);
         }
-        BRS_Render3D_rotateObject(applicationState->object3D);
+
+        rotateObject(applicationState);
+
         handleVideo(applicationState);
     }
 }

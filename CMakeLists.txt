@@ -7,4 +7,4 @@ find_package(SDL2 REQUIRED)
 
 add_executable(draw_obj_3d main.c render3d.c color.c video.c)
 
-target_link_libraries(draw_obj_3d ${SDL2_LIBRARIES})
+target_link_libraries(draw_obj_3d ${SDL2_LIBRARIES} m)
