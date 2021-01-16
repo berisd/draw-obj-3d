@@ -15,4 +15,6 @@ const BRS_Color COLOR_BLACK;
 const BRS_Color COLOR_DARK_GRAY;
 const BRS_Color COLOR_LIGHT_GRAY;
 
+BRS_Color *BRS_copyColor(const BRS_Color *color);
+
 #endif //DRAW_OBJ_3D_COLOR_H

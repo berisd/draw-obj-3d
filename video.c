@@ -36,7 +36,7 @@ static bool initSdl(BRS_VideoContext *videoContext) {
         return false;
     }
 
-    videoContext->renderer = SDL_CreateRenderer(videoContext->window, -1, 0);
+    videoContext->renderer = SDL_CreateRenderer(videoContext->window, -1, SDL_RENDERER_PRESENTVSYNC);
 
     if (videoContext->renderer == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Renderer could not be created! SDL_Error: %s", SDL_GetError());

@@ -15,13 +15,13 @@ typedef struct BRS_VideoContext {
     SDL_Renderer *renderer;
 } BRS_VideoContext;
 
-struct BRS_Color {
+struct _BRS_Color {
     uint8_t r;
     uint8_t g;
     uint8_t b;
     uint8_t a;
 };
-typedef struct BRS_Color BRS_Color;
+typedef struct _BRS_Color BRS_Color;
 
 typedef struct _BRS_Point {
     int x;
