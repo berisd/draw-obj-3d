@@ -68,49 +68,51 @@ static BRS_Object2D *createRect(const BRS_Render2D_Context *renderContext) {
 }
 
 static BRS_Object3D *createCube() {
+    int32_t sideLen = 10;
+
     BRS_Object3D *obj3d = malloc(sizeof(BRS_Object3D));
 
     BRS_Polygon3D *frontFace = malloc(sizeof(BRS_Polygon3D));
     frontFace->numVertices = 4;
-    frontFace->vertices[0] = BRS_Render3D_createVertex(0, 0, 10);
-    frontFace->vertices[1] = BRS_Render3D_createVertex(10, 0, 10);
-    frontFace->vertices[2] = BRS_Render3D_createVertex(10, 10, 10);
-    frontFace->vertices[3] = BRS_Render3D_createVertex(0, 10, 10);
+    frontFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
+    frontFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
+    frontFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
+    frontFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, sideLen);
 
     BRS_Polygon3D *backFace = malloc(sizeof(BRS_Polygon3D));
     backFace->numVertices = 4;
     backFace->vertices[0] = BRS_Render3D_createVertex(0, 0, 0);
-    backFace->vertices[1] = BRS_Render3D_createVertex(10, 0, 0);
-    backFace->vertices[2] = BRS_Render3D_createVertex(10, 10, 0);
-    backFace->vertices[3] = BRS_Render3D_createVertex(0, 10, 0);
+    backFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, 0);
+    backFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
+    backFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, 0);
 
     BRS_Polygon3D *bottomFace = malloc(sizeof(BRS_Polygon3D));
     bottomFace->numVertices = 4;
-    bottomFace->vertices[0] = BRS_Render3D_createVertex(0, 0, 10);
-    bottomFace->vertices[1] = BRS_Render3D_createVertex(10, 0, 10);
-    bottomFace->vertices[2] = BRS_Render3D_createVertex(10, 0, 0);
+    bottomFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
+    bottomFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
+    bottomFace->vertices[2] = BRS_Render3D_createVertex(sideLen, 0, 0);
     bottomFace->vertices[3] = BRS_Render3D_createVertex(0, 0, 0);
 
     BRS_Polygon3D *topFace = malloc(sizeof(BRS_Polygon3D));
     topFace->numVertices = 4;
-    topFace->vertices[0] = BRS_Render3D_createVertex(0, 10, 10);
-    topFace->vertices[1] = BRS_Render3D_createVertex(10, 10, 10);
-    topFace->vertices[2] = BRS_Render3D_createVertex(10, 10, 0);
-    topFace->vertices[3] = BRS_Render3D_createVertex(0, 10, 0);
+    topFace->vertices[0] = BRS_Render3D_createVertex(0, sideLen, sideLen);
+    topFace->vertices[1] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
+    topFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
+    topFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, 0);
 
     BRS_Polygon3D *leftFace = malloc(sizeof(BRS_Polygon3D));
     leftFace->numVertices = 4;
-    leftFace->vertices[0] = BRS_Render3D_createVertex(0, 0, 10);
+    leftFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
     leftFace->vertices[1] = BRS_Render3D_createVertex(0, 0, 0);
-    leftFace->vertices[2] = BRS_Render3D_createVertex(0, 10, 0);
-    leftFace->vertices[3] = BRS_Render3D_createVertex(0, 10, 10);
+    leftFace->vertices[2] = BRS_Render3D_createVertex(0, sideLen, 0);
+    leftFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, sideLen);
 
     BRS_Polygon3D *rightFace = malloc(sizeof(BRS_Polygon3D));
     rightFace->numVertices = 4;
-    rightFace->vertices[0] = BRS_Render3D_createVertex(10, 0, 10);
-    rightFace->vertices[1] = BRS_Render3D_createVertex(10, 0, 0);
-    rightFace->vertices[2] = BRS_Render3D_createVertex(10, 10, 0);
-    rightFace->vertices[3] = BRS_Render3D_createVertex(10, 10, 10);
+    rightFace->vertices[0] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
+    rightFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, 0);
+    rightFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
+    rightFace->vertices[3] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
 
     obj3d->numPolygons = 1;
     obj3d->polygons[0] = frontFace;
@@ -166,9 +168,9 @@ static bool checkQuitApplication(SDL_Event *event) {
 static void handleVideo(ApplicationState *applicationState) {
     BRS_setColor(applicationState->videoContext, &COLOR_BLACK);
     BRS_clearVideo(applicationState->videoContext);
-//    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D,
-//                            applicationState->transformation3D);
-    BRS_Render2D_drawObject(applicationState->render2DContext, applicationState->object2D, applicationState->transformation2D);
+    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D,
+                            applicationState->transformation3D);
+//    BRS_Render2D_drawObject(applicationState->render2DContext, applicationState->object2D, applicationState->transformation2D);
     BRS_updateVideo(applicationState->videoContext);
 }
 
@@ -189,11 +191,11 @@ static void rotateObject3D(ApplicationState *applicationState) {
 //    if (applicationState->transformation3D->rotateDegrees >= 360) {
 //        applicationState->transformation3D->rotateDegrees = 1;
 //    }
-    if (applicationState->transformation3D->rotateDegrees < 180) {
+    if (applicationState->transformation3D->rotateDegrees < 360) {
         applicationState->transformation3D->rotateDegrees++;
+    } else {
+        applicationState->transformation3D->rotateDegrees = 1;
     }
-
-
 }
 
 static void runApplication(ApplicationState *applicationState) {
@@ -205,8 +207,8 @@ static void runApplication(ApplicationState *applicationState) {
             processEvent(&event, applicationState);
         }
 
-        rotateObject2D(applicationState);
-//        rotateObject3D(applicationState);
+//        rotateObject2D(applicationState);
+        rotateObject3D(applicationState);
 
         handleVideo(applicationState);
     }
