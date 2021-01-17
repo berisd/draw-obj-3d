@@ -39,9 +39,27 @@ typedef struct _BRS_Polygon {
     BRS_Vertex *vertices[MAX_VERTICES];
 } BRS_Polygon;
 
+typedef struct _BRS_Object2D {
+    int32_t sideLength;
+    BRS_Polygon *polygon;
+} BRS_Object2D;
+
 typedef struct _BRS_Transformation2D {
     uint16_t rotateDegrees;
 } BRS_Transformation2D;
+
+typedef struct _BRS_Render2D_Context {
+    BRS_VideoContext *videoContext;
+    BRS_Point *origin;
+} BRS_Render2D_Context;
+
+BRS_Render2D_Context *BRS_Render2D_createContext(const BRS_VideoContext *videoContext, const BRS_Point *origin);
+
+void BRS_Render2D_destroyContext(BRS_Render2D_Context *renderContext);
+
+BRS_Object2D *BRS_Render2D_createObject(int32_t sideLength, BRS_Polygon *polygon);
+
+void BRS_Render2D_destroyObject(BRS_Object2D *object2D);
 
 void BRS_drawPoint(const BRS_VideoContext *context, const BRS_Point *point);
 
@@ -59,7 +77,8 @@ BRS_Dimension *BRS_copyDimension(BRS_Dimension *source);
 
 BRS_Vertex *BRS_Render_createVertex(int32_t x, int32_t y);
 
-void BRS_Render_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon, BRS_Transformation2D *transformation2D);
+void BRS_Render2D_drawObject(BRS_Render2D_Context *renderContext, BRS_Object2D *object2d,
+                             BRS_Transformation2D *transformation2D);
 
 BRS_Transformation2D *BRS_Render2D_createTransformation();
 

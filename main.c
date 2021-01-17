@@ -14,8 +14,10 @@ typedef struct ApplicationConfig {
 
 typedef struct _ApplicationState {
     BRS_VideoContext *videoContext;
+    BRS_Render2D_Context *render2DContext;
+    BRS_Object2D *object2D;
+    BRS_Point3D *origin3D;
     BRS_Object3D *object3D;
-    BRS_Polygon *object2D;
     BRS_Transformation3D *transformation3D;
     BRS_Transformation2D *transformation2D;
     bool quit;
@@ -40,20 +42,29 @@ static ApplicationState *createApplicationState() {
 }
 
 static void destroyApplicationState(ApplicationState *applicationState) {
+    BRS_Render2D_destroyObject(applicationState->object2D);
+    //TODO destroy object3D
+    //TODO destroy transformation2D
+    //TODO destroy transformation3D
+    BRS_Render2D_destroyContext(applicationState->render2DContext);
     free(applicationState);
 }
 
-static BRS_Polygon *createRect() {
-    int32_t sidelen = 50;
-    int32_t originX = (800-sidelen) / 2;
-    int32_t originY = (600-sidelen) / 2;
+static BRS_Object2D *createRect(const BRS_Render2D_Context *renderContext) {
+    BRS_Object2D *obj2d = malloc(sizeof(BRS_Object2D));
+    obj2d->sideLength = 50;
+
+    int32_t originX = renderContext->origin->x - (obj2d->sideLength/2);
+    int32_t originY = renderContext->origin->y - (obj2d->sideLength/2);
     BRS_Polygon *polygon = malloc(sizeof(BRS_Polygon));
     polygon->numVertices = 4;
     polygon->vertices[0] = BRS_Render_createVertex(originX, originY);
-    polygon->vertices[1] = BRS_Render_createVertex(originX, originY+sidelen);
-    polygon->vertices[2] = BRS_Render_createVertex(originX+sidelen, originY+sidelen);
-    polygon->vertices[3] = BRS_Render_createVertex(originX+sidelen, originY);
-    return polygon;
+    polygon->vertices[1] = BRS_Render_createVertex(originX, originY+obj2d->sideLength);
+    polygon->vertices[2] = BRS_Render_createVertex(originX+obj2d->sideLength, originY+obj2d->sideLength);
+    polygon->vertices[3] = BRS_Render_createVertex(originX+obj2d->sideLength, originY);
+
+    obj2d->polygon = polygon;
+    return obj2d;
 }
 
 static BRS_Object3D *createCube() {
@@ -127,9 +138,12 @@ static ApplicationState *initApplication(const ApplicationConfig *config) {
     if (videoContext == NULL) {
         return NULL;
     }
+    BRS_Point origin2D = { .x = videoContext->screenWidth / 2, .y = videoContext->screenHeight / 2};
+
     applicationState->videoContext = videoContext;
+    applicationState->render2DContext = BRS_Render2D_createContext(videoContext, &origin2D);
     applicationState->object3D = createCube();
-    applicationState->object2D = createRect();
+    applicationState->object2D = createRect(applicationState->render2DContext);
     applicationState->transformation3D = BRS_Render3D_createTransformation();
     applicationState->transformation2D = BRS_Render2D_createTransformation();
     atexit(SDL_Quit);
@@ -154,7 +168,7 @@ static void handleVideo(ApplicationState *applicationState) {
     BRS_clearVideo(applicationState->videoContext);
 //    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D,
 //                            applicationState->transformation3D);
-    BRS_Render_drawPolygon(applicationState->videoContext, applicationState->object2D, applicationState->transformation2D);
+    BRS_Render2D_drawObject(applicationState->render2DContext, applicationState->object2D, applicationState->transformation2D);
     BRS_updateVideo(applicationState->videoContext);
 }
 

@@ -11,10 +11,6 @@
 #include "video.h"
 #include "render.h"
 
-
-#define MAX_POLYGONS_3D 16
-#define MAX_VERTICES_3D 16
-
 typedef struct _BRS_Point3D {
     int32_t x;
     int32_t y;
@@ -34,12 +30,12 @@ typedef struct _BRS_Vertex3D {
 
 typedef struct _BRS_Polygon3D {
     uint8_t numVertices;
-    BRS_Vertex3D *vertices[MAX_VERTICES_3D];
+    BRS_Vertex3D *vertices[MAX_VERTICES];
 } BRS_Polygon3D;
 
 typedef struct _BRS_Object3D {
     uint8_t numPolygons;
-    BRS_Polygon3D *polygons[MAX_POLYGONS_3D];
+    BRS_Polygon3D *polygons[MAX_POLYGONS];
 } BRS_Object3D;
 
 typedef struct _BRS_Transformation3D {

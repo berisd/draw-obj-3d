@@ -4,6 +4,42 @@
 
 #include "render.h"
 
+BRS_Render2D_Context *BRS_Render2D_createContext(const BRS_VideoContext *videoContext, const BRS_Point *origin) {
+    BRS_Render2D_Context *renderContext = malloc(sizeof(BRS_Render2D_Context));
+    renderContext->videoContext = (BRS_VideoContext *) videoContext;
+    renderContext->origin = BRS_copyPoint((BRS_Point *) origin);
+    return renderContext;
+}
+
+void BRS_Render2D_destroyContext(BRS_Render2D_Context *renderContext) {
+    free(renderContext->origin);
+    free(renderContext);
+}
+
+BRS_Object2D *BRS_Render2D_createObject(int32_t sideLength, BRS_Polygon *polygon) {
+    BRS_Object2D *obj2d = malloc(sizeof(BRS_Object2D));
+    obj2d->sideLength = sideLength;
+    obj2d->polygon = polygon;
+    return obj2d;
+}
+
+static void BRS_Render2D_destroyVertex(BRS_Vertex *vertex) {
+    free(vertex->position);
+    free(vertex);
+}
+
+static void BRS_Render2D_destroyPolygon(BRS_Polygon *polygon) {
+    for (uint16_t i = 0; i < polygon->numVertices; i++) {
+        BRS_Render2D_destroyVertex(polygon->vertices[i]);
+    }
+    free(polygon);
+}
+
+void BRS_Render2D_destroyObject(BRS_Object2D *object2D) {
+    BRS_Render2D_destroyPolygon(object2D->polygon);
+    free(object2D);
+}
+
 void BRS_drawPoint(const BRS_VideoContext *context, const BRS_Point *point) {
     SDL_RenderDrawPoint(context->renderer, point->x, point->y);
 }
@@ -45,10 +81,10 @@ BRS_Vertex *BRS_Render_createVertex(int32_t x, int32_t y) {
 }
 
 static void
-calcScreenPoint(const BRS_Point *point2D, BRS_Point *screenPoint, BRS_Transformation2D *transformation2D) {
-    int32_t sidelen = 50;
-    int32_t originX = (800-sidelen) / 2;
-    int32_t originY = (600-sidelen) / 2;
+calcScreenPoint(BRS_Render2D_Context *renderContext, const BRS_Point *point2D, BRS_Point *screenPoint,
+                BRS_Transformation2D *transformation2D, int32_t sideLength) {
+    int32_t originX = renderContext->origin->x - sideLength / 2;
+    int32_t originY = renderContext->origin->y - sideLength / 2;
 
     BRS_Point newPoint = {.x = point2D->x - originX, .y = point2D->y - originY};
 
@@ -60,9 +96,11 @@ calcScreenPoint(const BRS_Point *point2D, BRS_Point *screenPoint, BRS_Transforma
     screenPoint->y += originY;
 }
 
-void BRS_Render_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon, BRS_Transformation2D *transformation2D) {
+static void BRS_Render_drawPolygon(BRS_Render2D_Context *renderContext, BRS_Object2D *object2D,
+                                   BRS_Transformation2D *transformation2D) {
     const BRS_Color *color = &COLOR_YELLOW;
-    BRS_setColor(context, color);
+    BRS_Polygon *polygon = object2D->polygon;
+    BRS_setColor(renderContext->videoContext, color);
     BRS_Vertex *lastVertex = NULL;
     BRS_Vertex *firstVertex = NULL;
     BRS_Point p1;
@@ -74,19 +112,25 @@ void BRS_Render_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon, BRS
             firstVertex = polygon->vertices[verticesIndex];
         }
         if (lastVertex != NULL) {
-            calcScreenPoint(lastVertex->position, line.p1, transformation2D);
-            calcScreenPoint(polygon->vertices[verticesIndex]->position, line.p2, transformation2D);
-            BRS_drawline(context, &line);
+            calcScreenPoint(renderContext, lastVertex->position, line.p1, transformation2D, object2D->sideLength);
+            calcScreenPoint(renderContext, polygon->vertices[verticesIndex]->position, line.p2, transformation2D,
+                            object2D->sideLength);
+            BRS_drawline(renderContext->videoContext, &line);
         }
         lastVertex = polygon->vertices[verticesIndex];
     }
-    calcScreenPoint(lastVertex->position, line.p1, transformation2D);
-    calcScreenPoint(firstVertex->position, line.p2, transformation2D);
-    BRS_drawline(context, &line);
+    calcScreenPoint(renderContext, lastVertex->position, line.p1, transformation2D, object2D->sideLength);
+    calcScreenPoint(renderContext, firstVertex->position, line.p2, transformation2D, object2D->sideLength);
+    BRS_drawline(renderContext->videoContext, &line);
 }
 
 BRS_Transformation2D *BRS_Render2D_createTransformation() {
     BRS_Transformation2D *transformation2D = malloc(sizeof(BRS_Transformation2D));
     transformation2D->rotateDegrees = 0;
     return transformation2D;
+}
+
+void BRS_Render2D_drawObject(BRS_Render2D_Context *renderContext, BRS_Object2D *object2d,
+                             BRS_Transformation2D *transformation2D) {
+    BRS_Render_drawPolygon(renderContext, object2d, transformation2D);
 }
