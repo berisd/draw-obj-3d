@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "video.h"
 #include "color.h"
+#include "render.h"
 #include "render3d.h"
 
 typedef struct ApplicationConfig {

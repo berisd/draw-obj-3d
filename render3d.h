@@ -9,6 +9,7 @@
 #include <math.h>
 #include "color.h"
 #include "video.h"
+#include "render.h"
 
 
 #define MAX_POLYGONS_3D 16
