@@ -7,6 +7,13 @@
 
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include "color.h"
+
+#define MAX_POLYGONS 16
+#define MAX_VERTICES 16
+
+#define DEG_TO_RAD(deg) (M_PI*deg/180)
+#define RAD_TO_DEG(rad) (180*rad/M_PI)
 
 typedef struct BRS_VideoContext {
     uint32_t screenWidth;
@@ -14,14 +21,6 @@ typedef struct BRS_VideoContext {
     SDL_Window *window;
     SDL_Renderer *renderer;
 } BRS_VideoContext;
-
-struct _BRS_Color {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-};
-typedef struct _BRS_Color BRS_Color;
 
 typedef struct _BRS_Point {
     int x;
@@ -48,6 +47,20 @@ struct BRS_Dimension {
 };
 typedef struct BRS_Dimension BRS_Dimension;
 
+typedef struct _BRS_Vertex {
+    BRS_Point *position;
+    BRS_Color *color;
+} BRS_Vertex;
+
+typedef struct _BRS_Polygon {
+    uint8_t numVertices;
+    BRS_Vertex *vertices[MAX_VERTICES];
+} BRS_Polygon;
+
+typedef struct _BRS_Transformation2D {
+    uint16_t rotateDegrees;
+} BRS_Transformation2D;
+
 BRS_VideoContext *BRS_initVideo(uint32_t screenWidth, uint32_t screenHeight);
 
 void BRS_shutdownVideo(const BRS_VideoContext *context);
@@ -71,5 +84,11 @@ bool BRS_PointInRect(BRS_Point *point, BRS_Rect *rect);
 BRS_Point *BRS_copyPoint(BRS_Point *source);
 
 BRS_Dimension *BRS_copyDimension(BRS_Dimension *source);
+
+BRS_Vertex *BRS_Render_createVertex(int32_t x, int32_t y);
+
+void BRS_Render_drawPolygon(BRS_VideoContext *context, BRS_Polygon *polygon, BRS_Transformation2D *transformation2D);
+
+BRS_Transformation2D *BRS_Render2D_createTransformation();
 
 #endif //DRAW_OBJ_3D_VIDEO_H
