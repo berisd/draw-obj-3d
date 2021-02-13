@@ -27,8 +27,8 @@ static ApplicationState *applicationState = NULL;
 
 static ApplicationConfig *createConfig() {
     ApplicationConfig *config = malloc(sizeof(ApplicationConfig));
-    config->screenWidth = 800;
-    config->screenHeight = 600;
+    config->screenWidth = 640;
+    config->screenHeight = 480;
     return config;
 }
 
@@ -68,7 +68,7 @@ static BRS_Object2D *createRect(const BRS_Render2D_Context *renderContext) {
 }
 
 static BRS_Object3D *createCube() {
-    int32_t sideLen = 10;
+    int32_t sideLen = 40;
 
     BRS_Object3D *obj3d = malloc(sizeof(BRS_Object3D));
 
@@ -116,11 +116,11 @@ static BRS_Object3D *createCube() {
 
     obj3d->numPolygons = 1;
     obj3d->polygons[0] = frontFace;
-//    obj3d->polygons[1] = backFace;
-//    obj3d->polygons[2] = topFace;
-//    obj3d->polygons[3] = bottomFace;
-//    obj3d->polygons[4] = leftFace;
-//    obj3d->polygons[5] = rightFace;
+    obj3d->polygons[1] = backFace;
+    obj3d->polygons[2] = topFace;
+    obj3d->polygons[3] = bottomFace;
+    obj3d->polygons[4] = leftFace;
+    obj3d->polygons[5] = rightFace;
 
 //    obj3d->numPolygons = 2;
 //    obj3d->polygons[0] = frontFace;
@@ -187,15 +187,12 @@ static void rotateObject2D(ApplicationState *applicationState) {
 }
 
 static void rotateObject3D(ApplicationState *applicationState) {
-//    applicationState->transformation3D->rotateDegrees++;
-//    if (applicationState->transformation3D->rotateDegrees >= 360) {
-//        applicationState->transformation3D->rotateDegrees = 1;
-//    }
     if (applicationState->transformation3D->rotateDegrees < 360) {
         applicationState->transformation3D->rotateDegrees++;
     } else {
         applicationState->transformation3D->rotateDegrees = 1;
     }
+//    applicationState->transformation3D->rotateDegrees = 15;
 }
 
 static void runApplication(ApplicationState *applicationState) {

@@ -11,8 +11,8 @@
 #define MAX_VERTICES 16
 
 typedef struct _BRS_Point {
-    int x;
-    int y;
+    int32_t x;
+    int32_t y;
 } BRS_Point;
 typedef struct _BRS_Point BRS_Point;
 
