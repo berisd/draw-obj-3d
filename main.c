@@ -18,6 +18,7 @@ typedef struct _ApplicationState {
     BRS_Object2D *object2D;
     BRS_Point3D *origin3D;
     BRS_Object3D *object3D;
+    BRS_Object3D *object3D_transformed;
     BRS_Transformation3D *transformation3D;
     BRS_Transformation2D *transformation2D;
     bool quit;
@@ -68,53 +69,51 @@ static BRS_Object2D *createRect(const BRS_Render2D_Context *renderContext) {
 }
 
 static BRS_Object3D *createCube() {
-    int32_t sideLen = 40;
-
     BRS_Object3D *obj3d = malloc(sizeof(BRS_Object3D));
 
     BRS_Polygon3D *frontFace = malloc(sizeof(BRS_Polygon3D));
     frontFace->numVertices = 4;
-    frontFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
-    frontFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
-    frontFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
-    frontFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, sideLen);
+    frontFace->vertices[0] = BRS_Render3D_createVertex(-1, 1, -1);
+    frontFace->vertices[1] = BRS_Render3D_createVertex(1, 1, -1);
+    frontFace->vertices[2] = BRS_Render3D_createVertex(1, -1, -1);
+    frontFace->vertices[3] = BRS_Render3D_createVertex(-1, -1, -1);
 
     BRS_Polygon3D *backFace = malloc(sizeof(BRS_Polygon3D));
     backFace->numVertices = 4;
-    backFace->vertices[0] = BRS_Render3D_createVertex(0, 0, 0);
-    backFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, 0);
-    backFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
-    backFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, 0);
+    backFace->vertices[0] = BRS_Render3D_createVertex(1, 1, -1);
+    backFace->vertices[1] = BRS_Render3D_createVertex(1, 1, 1);
+    backFace->vertices[2] = BRS_Render3D_createVertex(1, -1, 1);
+    backFace->vertices[3] = BRS_Render3D_createVertex(1, -1, -1);
 
     BRS_Polygon3D *bottomFace = malloc(sizeof(BRS_Polygon3D));
     bottomFace->numVertices = 4;
-    bottomFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
-    bottomFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
-    bottomFace->vertices[2] = BRS_Render3D_createVertex(sideLen, 0, 0);
-    bottomFace->vertices[3] = BRS_Render3D_createVertex(0, 0, 0);
+    bottomFace->vertices[0] = BRS_Render3D_createVertex(1, 1, 1);
+    bottomFace->vertices[1] = BRS_Render3D_createVertex(-1, 1, 1);
+    bottomFace->vertices[2] = BRS_Render3D_createVertex(-1, -1, 1);
+    bottomFace->vertices[3] = BRS_Render3D_createVertex(1, -1, 1);
 
     BRS_Polygon3D *topFace = malloc(sizeof(BRS_Polygon3D));
     topFace->numVertices = 4;
-    topFace->vertices[0] = BRS_Render3D_createVertex(0, sideLen, sideLen);
-    topFace->vertices[1] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
-    topFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
-    topFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, 0);
+    topFace->vertices[0] = BRS_Render3D_createVertex(-1, 1, 1);
+    topFace->vertices[1] = BRS_Render3D_createVertex(-1, 1, -1);
+    topFace->vertices[2] = BRS_Render3D_createVertex(-1, -1, -1);
+    topFace->vertices[3] = BRS_Render3D_createVertex(-1, -1, 1);
 
     BRS_Polygon3D *leftFace = malloc(sizeof(BRS_Polygon3D));
     leftFace->numVertices = 4;
-    leftFace->vertices[0] = BRS_Render3D_createVertex(0, 0, sideLen);
-    leftFace->vertices[1] = BRS_Render3D_createVertex(0, 0, 0);
-    leftFace->vertices[2] = BRS_Render3D_createVertex(0, sideLen, 0);
-    leftFace->vertices[3] = BRS_Render3D_createVertex(0, sideLen, sideLen);
+    leftFace->vertices[0] = BRS_Render3D_createVertex(-1, 1, -1);
+    leftFace->vertices[1] = BRS_Render3D_createVertex(-1, 1, 1);
+    leftFace->vertices[2] = BRS_Render3D_createVertex(1, 1, 1);
+    leftFace->vertices[3] = BRS_Render3D_createVertex(1, 1, -1);
 
     BRS_Polygon3D *rightFace = malloc(sizeof(BRS_Polygon3D));
     rightFace->numVertices = 4;
-    rightFace->vertices[0] = BRS_Render3D_createVertex(sideLen, 0, sideLen);
-    rightFace->vertices[1] = BRS_Render3D_createVertex(sideLen, 0, 0);
-    rightFace->vertices[2] = BRS_Render3D_createVertex(sideLen, sideLen, 0);
-    rightFace->vertices[3] = BRS_Render3D_createVertex(sideLen, sideLen, sideLen);
+    rightFace->vertices[0] = BRS_Render3D_createVertex(-1, -1, -1);
+    rightFace->vertices[1] = BRS_Render3D_createVertex(1, -1, -1);
+    rightFace->vertices[2] = BRS_Render3D_createVertex(1, -1, 1);
+    rightFace->vertices[3] = BRS_Render3D_createVertex(-1, -1, 1);
 
-    obj3d->numPolygons = 1;
+    obj3d->numPolygons = 6;
     obj3d->polygons[0] = frontFace;
     obj3d->polygons[1] = backFace;
     obj3d->polygons[2] = topFace;
@@ -145,6 +144,7 @@ static ApplicationState *initApplication(const ApplicationConfig *config) {
     applicationState->videoContext = videoContext;
     applicationState->render2DContext = BRS_Render2D_createContext(videoContext, &origin2D);
     applicationState->object3D = createCube();
+    applicationState->object3D_transformed = createCube();
     applicationState->object2D = createRect(applicationState->render2DContext);
     applicationState->transformation3D = BRS_Render3D_createTransformation();
     applicationState->transformation2D = BRS_Render2D_createTransformation();
@@ -168,8 +168,11 @@ static bool checkQuitApplication(SDL_Event *event) {
 static void handleVideo(ApplicationState *applicationState) {
     BRS_setColor(applicationState->videoContext, &COLOR_BLACK);
     BRS_clearVideo(applicationState->videoContext);
-    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D,
-                            applicationState->transformation3D);
+
+    BRS_Render3D_calcObject(applicationState->videoContext, applicationState->object3D,
+                            applicationState->object3D_transformed, applicationState->transformation3D);
+
+    BRS_Render3D_drawObject(applicationState->videoContext, applicationState->object3D_transformed);
 //    BRS_Render2D_drawObject(applicationState->render2DContext, applicationState->object2D, applicationState->transformation2D);
     BRS_updateVideo(applicationState->videoContext);
 }

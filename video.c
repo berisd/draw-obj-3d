@@ -26,7 +26,7 @@ static bool initSdl(BRS_VideoContext *videoContext) {
         return false;
     }
 
-    videoContext->window = SDL_CreateWindow("Fontedit", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    videoContext->window = SDL_CreateWindow("3D Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                             videoContext->screenWidth,
                                             videoContext->screenHeight,
                                             SDL_WINDOW_SHOWN);
